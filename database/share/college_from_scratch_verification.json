@@ -1,0 +1,20 @@
+{
+  "verified_at_utc": "2026-09-26T07:58:28.155508+00:00",
+  "sql_file": "college_from_scratch.sql",
+  "sql_sha256": "356b3a9bd1d5fe2c3e9f79fe92e655175991c542ec170a2b08e99098e9097e36",
+  "fresh_database_import_verified": true,
+  "schema_and_all_rows_match_source": true,
+  "row_counts": {
+    "course": 5,
+    "department": 4,
+    "student_info": 15,
+    "subject": 15,
+    "employee_info": 10,
+    "project": 8,
+    "marks": 15,
+    "performance": 10
+  },
+  "foreign_keys": 8,
+  "all_courses_and_departments_assigned": true,
+  "source_database_unchanged": true
+}

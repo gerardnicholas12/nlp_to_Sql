@@ -1,0 +1,192 @@
+{
+  "database": "college",
+  "checked_at_utc": "2026-09-17T14:22:41.298276+00:00",
+  "fingerprint": {
+    "tables": {
+      "classes": {
+        "rows": 15,
+        "data_sha256": "5e1cfd3a6d850007965558d1055b6329e87913fdfb6c53168a5a6a66698015e0",
+        "ddl_sha256": "0e7543b0a93122cb6bdfc70accf1df1473289f657fc222364a25a8b8474aa5bb"
+      },
+      "courses": {
+        "rows": 15,
+        "data_sha256": "e32b625f85df2ab53b010ea088fba9ef228f2b212e0ad0a8901eae9bea922576",
+        "ddl_sha256": "e94ecf1da05b15a22fe28235d777bdc97b525b89ac87a15d84927f2698154a73"
+      },
+      "exams": {
+        "rows": 15,
+        "data_sha256": "7996c0f76bf9ec34486b59526fb0443431198c63d0ec66257b65a193efaf581b",
+        "ddl_sha256": "0190523666f0672f9d628a3af1deaf0c7088acfc6a436fc716ceb0977f1bd24c"
+      },
+      "faculty": {
+        "rows": 15,
+        "data_sha256": "bfae40474a0d1917c42940f7f40ff4d9f7212ee0721e303e5c66f0c4e53394e8",
+        "ddl_sha256": "47e43f9cf4b7ee144ff2cf54d4db225bfab4a1b69c7587c2e8f08f8a5758bdc0"
+      },
+      "results": {
+        "rows": 15,
+        "data_sha256": "7823f0d1c0af14851e974ee918434738d27d862f43cdf39c32743e7f0d95393d",
+        "ddl_sha256": "4fca3533351b17bbf3f33554c6e734fa33bc6f0168395471603bf3f3e026e861"
+      },
+      "students": {
+        "rows": 15,
+        "data_sha256": "db1ddc54132dda0860e259533c7ce9f83c37dff40e24e88e2266815b19ee7104",
+        "ddl_sha256": "44103e042148ab04eab754de7a025ee9b5faa449136e3720ffe165b21df59ae6"
+      }
+    },
+    "triggers": 4
+  },
+  "passed_checks": [
+    "exactly the six requested academic tables",
+    "exactly 15 rows in every table",
+    "six simple foreign-key relationships",
+    "show faculty",
+    "show classes",
+    "show courses",
+    "show students",
+    "show exams",
+    "show results",
+    "count students by class",
+    "show students with marks above 80",
+    "show students with marks between 60 and 80",
+    "show top 5 results with highest marks",
+    "show courses and faculty",
+    "show student name and class name",
+    "show students in semester 3",
+    "average marks per course",
+    "average marks per student",
+    "show students without results",
+    "show faculty without courses",
+    "show faculty with experience above 10",
+    "show courses with credits at least 4",
+    "show students in class CSE-3A",
+    "show name and email from students",
+    "top results rank actual exam marks",
+    "student without results is Neil",
+    "multiple results average independently per student",
+    "missing marks remain NULL",
+    "class counts include empty groups",
+    "every result matches the student class",
+    "orphan class rejected",
+    "orphan faculty rejected",
+    "duplicate SRN rejected",
+    "duplicate student exam result rejected",
+    "wrong-class exam result rejected",
+    "student class cannot invalidate results",
+    "exam class cannot invalidate results",
+    "marks above 100 rejected",
+    "negative marks rejected",
+    "invalid semester rejected",
+    "deleting referenced student rejected",
+    "deleting referenced exam rejected",
+    "zero marks accepted",
+    "verification left schema and data unchanged"
+  ],
+  "examples": [
+    {
+      "question": "show faculty",
+      "sql": "SELECT * FROM faculty ORDER BY faculty_id ASC",
+      "row_count": 15
+    },
+    {
+      "question": "show classes",
+      "sql": "SELECT * FROM classes ORDER BY class_id ASC",
+      "row_count": 15
+    },
+    {
+      "question": "show courses",
+      "sql": "SELECT * FROM courses ORDER BY course_id ASC",
+      "row_count": 15
+    },
+    {
+      "question": "show students",
+      "sql": "SELECT * FROM students ORDER BY student_id ASC",
+      "row_count": 15
+    },
+    {
+      "question": "show exams",
+      "sql": "SELECT * FROM exams ORDER BY exam_id ASC",
+      "row_count": 15
+    },
+    {
+      "question": "show results",
+      "sql": "SELECT * FROM results ORDER BY result_id ASC",
+      "row_count": 15
+    },
+    {
+      "question": "count students by class",
+      "sql": "SELECT classes.class_id, classes.class_name, COUNT(students.student_id) AS student_count FROM classes LEFT JOIN students ON students.class_id=classes.class_id GROUP BY classes.class_id, classes.class_name ORDER BY classes.class_id",
+      "row_count": 15
+    },
+    {
+      "question": "show students with marks above 80",
+      "sql": "SELECT students.student_id AS students_student_id, students.student_name AS students_student_name, results.result_id AS results_result_id, results.exam_id AS results_exam_id, results.marks AS results_marks FROM results JOIN students ON results.student_id = students.student_id WHERE results.marks > 80 ORDER BY results.result_id ASC",
+      "row_count": 8
+    },
+    {
+      "question": "show students with marks between 60 and 80",
+      "sql": "SELECT students.student_id AS students_student_id, students.student_name AS students_student_name, results.result_id AS results_result_id, results.exam_id AS results_exam_id, results.marks AS results_marks FROM results JOIN students ON results.student_id = students.student_id WHERE results.marks BETWEEN 60 AND 80 ORDER BY results.result_id ASC",
+      "row_count": 5
+    },
+    {
+      "question": "show top 5 results with highest marks",
+      "sql": "SELECT * FROM results ORDER BY marks DESC, result_id ASC LIMIT 5",
+      "row_count": 5
+    },
+    {
+      "question": "show courses and faculty",
+      "sql": "SELECT courses.course_id AS courses_course_id, courses.course_name AS courses_course_name, faculty.faculty_name AS faculty_faculty_name FROM courses JOIN faculty ON courses.faculty_id = faculty.faculty_id ORDER BY courses.course_id ASC",
+      "row_count": 15
+    },
+    {
+      "question": "show student name and class name",
+      "sql": "SELECT students.student_name AS students_student_name, classes.class_name AS classes_class_name FROM students JOIN classes ON students.class_id = classes.class_id ORDER BY students.student_id ASC",
+      "row_count": 15
+    },
+    {
+      "question": "show students in semester 3",
+      "sql": "SELECT students.student_id AS students_student_id, students.student_name AS students_student_name FROM students JOIN classes ON students.class_id = classes.class_id WHERE classes.semester = 3 ORDER BY students.student_id ASC",
+      "row_count": 10
+    },
+    {
+      "question": "average marks per course",
+      "sql": "SELECT courses.course_id, courses.course_name, AVG(results.marks) AS average_marks FROM courses LEFT JOIN exams ON exams.course_id=courses.course_id LEFT JOIN results ON results.exam_id=exams.exam_id GROUP BY courses.course_id, courses.course_name ORDER BY courses.course_id",
+      "row_count": 15
+    },
+    {
+      "question": "average marks per student",
+      "sql": "SELECT students.student_id, students.student_name, AVG(results.marks) AS average_marks FROM students LEFT JOIN results ON results.student_id=students.student_id GROUP BY students.student_id, students.student_name ORDER BY students.student_id",
+      "row_count": 15
+    },
+    {
+      "question": "show students without results",
+      "sql": "SELECT students.* FROM students WHERE NOT EXISTS (SELECT 1 FROM results WHERE results.student_id=students.student_id) ORDER BY students.student_id",
+      "row_count": 1
+    },
+    {
+      "question": "show faculty without courses",
+      "sql": "SELECT faculty.* FROM faculty WHERE NOT EXISTS (SELECT 1 FROM courses WHERE courses.faculty_id=faculty.faculty_id) ORDER BY faculty.faculty_id",
+      "row_count": 5
+    },
+    {
+      "question": "show faculty with experience above 10",
+      "sql": "SELECT * FROM faculty WHERE experience > 10 ORDER BY faculty_id ASC",
+      "row_count": 8
+    },
+    {
+      "question": "show courses with credits at least 4",
+      "sql": "SELECT * FROM courses WHERE credits >= 4 ORDER BY course_id ASC",
+      "row_count": 7
+    },
+    {
+      "question": "show students in class CSE-3A",
+      "sql": "SELECT students.student_id AS students_student_id, students.student_name AS students_student_name FROM students JOIN classes ON students.class_id = classes.class_id WHERE LOWER(classes.class_name) = 'cse-3a' ORDER BY students.student_id ASC",
+      "row_count": 2
+    },
+    {
+      "question": "show name and email from students",
+      "sql": "SELECT student_name, email FROM students ORDER BY student_id ASC",
+      "row_count": 15
+    }
+  ]
+}

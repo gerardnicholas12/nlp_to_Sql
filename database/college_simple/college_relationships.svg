@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1040" viewBox="0 0 1600 1040">
+<title>College database: six tables and six one-to-many relationships</title>
+<desc>Faculty teaches courses. Classes contain students and schedule exams. Courses have exams. Results link each student to an exam.</desc>
+<rect width="100%" height="100%" fill="#f6f8fc"/>
+<text x="60" y="64" font-family="Segoe UI, Arial, sans-serif" font-size="40" font-weight="600" fill="#17263c" text-anchor="start">College database</text>
+<text x="60" y="102" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="400" fill="#52627b" text-anchor="start">6 tables  /  6 relationships  /  15 records per table</text>
+<polyline points="420,240 620,240" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="433,232 433,248" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="440,232 440,248" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="620,231 604,240 620,249" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="595" cy="240" r="4" fill="#f6f8fc" stroke="#52627b" stroke-width="2"/>
+<rect x="479.0" y="197" width="82.0" height="32" rx="5" fill="#f6f8fc" stroke="none" stroke-width="1.5"/>
+<text x="520" y="220" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" fill="#52627b" text-anchor="middle">teaches</text>
+<polyline points="980,240 1180,240" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="993,232 993,248" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1000,232 1000,248" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1180,231 1164,240 1180,249" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1155" cy="240" r="4" fill="#f6f8fc" stroke="#52627b" stroke-width="2"/>
+<rect x="1022.75" y="197" width="114.5" height="32" rx="5" fill="#f6f8fc" stroke="none" stroke-width="1.5"/>
+<text x="1080" y="220" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" fill="#52627b" text-anchor="middle">assessed by</text>
+<polyline points="420,740 620,740" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="433,732 433,748" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="440,732 440,748" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="620,731 604,740 620,749" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="595" cy="740" r="4" fill="#f6f8fc" stroke="#52627b" stroke-width="2"/>
+<rect x="476.0" y="697" width="88.0" height="32" rx="5" fill="#f6f8fc" stroke="none" stroke-width="1.5"/>
+<text x="520" y="720" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" fill="#52627b" text-anchor="middle">contains</text>
+<polyline points="980,740 1180,740" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="993,732 993,748" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1000,732 1000,748" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1180,731 1164,740 1180,749" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1155" cy="740" r="4" fill="#f6f8fc" stroke="#52627b" stroke-width="2"/>
+<rect x="1037.0" y="697" width="86.0" height="32" rx="5" fill="#f6f8fc" stroke="none" stroke-width="1.5"/>
+<text x="1080" y="720" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" fill="#52627b" text-anchor="middle">receives</text>
+<polyline points="1360,392 1360,650" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1352,405 1368,405" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1352,412 1368,412" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1351,650 1360,634 1369,650" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1360" cy="625" r="4" fill="#f6f8fc" stroke="#52627b" stroke-width="2"/>
+<rect x="1383.25" y="509" width="95.5" height="32" rx="5" fill="#f6f8fc" stroke="none" stroke-width="1.5"/>
+<text x="1431" y="532" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" fill="#52627b" text-anchor="middle">produces</text>
+<polyline points="240,650 240,475 1110,475 1110,340 1180,340" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="232,630 248,630" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="232,637 248,637" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<polyline points="1180,331 1164,340 1180,349" fill="none" stroke="#52627b" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1155" cy="340" r="4" fill="#f6f8fc" stroke="#52627b" stroke-width="2"/>
+<rect x="665.25" y="444" width="99.5" height="32" rx="5" fill="#f6f8fc" stroke="none" stroke-width="1.5"/>
+<text x="715" y="467" font-family="Segoe UI, Arial, sans-serif" font-size="18" font-weight="400" fill="#52627b" text-anchor="middle">schedules</text>
+<rect x="60" y="150" width="360" height="242" rx="10" fill="#ffffff" stroke="#d5deeb" stroke-width="1.5"/>
+<rect x="61" y="151" width="358" height="52" rx="9" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<rect x="61" y="185" width="358" height="18" rx="0" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="80" y="185" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" fill="#2859a0" text-anchor="start">faculty</text>
+<text x="400" y="184" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" fill="#52627b" text-anchor="end">15 rows</text>
+<polyline points="60,204 420,204" fill="none" stroke="#d5deeb" stroke-width="1" stroke-linejoin="round"/>
+<rect x="77" y="213" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="94.5" y="230" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">PK</text>
+<text x="126" y="233" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">faculty_id</text>
+<text x="400" y="233" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<text x="126" y="264" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">faculty_name</text>
+<text x="400" y="264" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<text x="126" y="295" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">designation</text>
+<text x="400" y="295" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<text x="126" y="326" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">qualification</text>
+<text x="400" y="326" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<text x="126" y="357" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">experience</text>
+<text x="400" y="357" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="620" y="150" width="360" height="211" rx="10" fill="#ffffff" stroke="#d5deeb" stroke-width="1.5"/>
+<rect x="621" y="151" width="358" height="52" rx="9" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<rect x="621" y="185" width="358" height="18" rx="0" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="640" y="185" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" fill="#2859a0" text-anchor="start">courses</text>
+<text x="960" y="184" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" fill="#52627b" text-anchor="end">15 rows</text>
+<polyline points="620,204 980,204" fill="none" stroke="#d5deeb" stroke-width="1" stroke-linejoin="round"/>
+<rect x="637" y="213" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="654.5" y="230" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">PK</text>
+<text x="686" y="233" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">course_id</text>
+<text x="960" y="233" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="637" y="244" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="654.5" y="261" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">UK</text>
+<text x="686" y="264" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">course_name</text>
+<text x="960" y="264" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<text x="686" y="295" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">credits</text>
+<text x="960" y="295" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="637" y="306" width="35" height="24" rx="4" fill="#e5f3ed" stroke="none" stroke-width="1.5"/>
+<text x="654.5" y="323" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#23674c" text-anchor="middle">FK</text>
+<text x="686" y="326" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">faculty_id</text>
+<text x="960" y="326" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="1180" y="150" width="360" height="242" rx="10" fill="#ffffff" stroke="#d5deeb" stroke-width="1.5"/>
+<rect x="1181" y="151" width="358" height="52" rx="9" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<rect x="1181" y="185" width="358" height="18" rx="0" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="1200" y="185" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" fill="#2859a0" text-anchor="start">exams</text>
+<text x="1520" y="184" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" fill="#52627b" text-anchor="end">15 rows</text>
+<polyline points="1180,204 1540,204" fill="none" stroke="#d5deeb" stroke-width="1" stroke-linejoin="round"/>
+<rect x="1197" y="213" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="1214.5" y="230" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">PK</text>
+<text x="1246" y="233" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">exam_id</text>
+<text x="1520" y="233" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<text x="1246" y="264" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">exam_name</text>
+<text x="1520" y="264" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<rect x="1197" y="275" width="35" height="24" rx="4" fill="#e5f3ed" stroke="none" stroke-width="1.5"/>
+<text x="1214.5" y="292" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#23674c" text-anchor="middle">FK</text>
+<text x="1246" y="295" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">class_id</text>
+<text x="1520" y="295" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="1197" y="306" width="35" height="24" rx="4" fill="#e5f3ed" stroke="none" stroke-width="1.5"/>
+<text x="1214.5" y="323" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#23674c" text-anchor="middle">FK</text>
+<text x="1246" y="326" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">course_id</text>
+<text x="1520" y="326" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<text x="1246" y="357" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">exam_date</text>
+<text x="1520" y="357" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">DATE</text>
+<rect x="60" y="650" width="360" height="180" rx="10" fill="#ffffff" stroke="#d5deeb" stroke-width="1.5"/>
+<rect x="61" y="651" width="358" height="52" rx="9" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<rect x="61" y="685" width="358" height="18" rx="0" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="80" y="685" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" fill="#2859a0" text-anchor="start">classes</text>
+<text x="400" y="684" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" fill="#52627b" text-anchor="end">15 rows</text>
+<polyline points="60,704 420,704" fill="none" stroke="#d5deeb" stroke-width="1" stroke-linejoin="round"/>
+<rect x="77" y="713" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="94.5" y="730" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">PK</text>
+<text x="126" y="733" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">class_id</text>
+<text x="400" y="733" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="77" y="744" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="94.5" y="761" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">UK</text>
+<text x="126" y="764" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">class_name</text>
+<text x="400" y="764" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<text x="126" y="795" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">semester</text>
+<text x="400" y="795" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="620" y="610" width="360" height="304" rx="10" fill="#ffffff" stroke="#d5deeb" stroke-width="1.5"/>
+<rect x="621" y="611" width="358" height="52" rx="9" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<rect x="621" y="645" width="358" height="18" rx="0" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="640" y="645" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" fill="#2859a0" text-anchor="start">students</text>
+<text x="960" y="644" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" fill="#52627b" text-anchor="end">15 rows</text>
+<polyline points="620,664 980,664" fill="none" stroke="#d5deeb" stroke-width="1" stroke-linejoin="round"/>
+<rect x="637" y="673" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="654.5" y="690" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">PK</text>
+<text x="686" y="693" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">student_id</text>
+<text x="960" y="693" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="637" y="704" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="654.5" y="721" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">UK</text>
+<text x="686" y="724" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">srn</text>
+<text x="960" y="724" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<text x="686" y="755" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">student_name</text>
+<text x="960" y="755" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<text x="686" y="786" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">address</text>
+<text x="960" y="786" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<text x="686" y="817" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">phone</text>
+<text x="960" y="817" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<rect x="637" y="828" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="654.5" y="845" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">UK</text>
+<text x="686" y="848" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">email</text>
+<text x="960" y="848" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">VARCHAR</text>
+<rect x="637" y="859" width="35" height="24" rx="4" fill="#e5f3ed" stroke="none" stroke-width="1.5"/>
+<text x="654.5" y="876" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#23674c" text-anchor="middle">FK</text>
+<text x="686" y="879" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">class_id</text>
+<text x="960" y="879" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="1180" y="650" width="360" height="211" rx="10" fill="#ffffff" stroke="#d5deeb" stroke-width="1.5"/>
+<rect x="1181" y="651" width="358" height="52" rx="9" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<rect x="1181" y="685" width="358" height="18" rx="0" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="1200" y="685" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="600" fill="#2859a0" text-anchor="start">results</text>
+<text x="1520" y="684" font-family="Segoe UI, Arial, sans-serif" font-size="16" font-weight="400" fill="#52627b" text-anchor="end">15 rows</text>
+<polyline points="1180,704 1540,704" fill="none" stroke="#d5deeb" stroke-width="1" stroke-linejoin="round"/>
+<rect x="1197" y="713" width="35" height="24" rx="4" fill="#eaf0fa" stroke="none" stroke-width="1.5"/>
+<text x="1214.5" y="730" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#2859a0" text-anchor="middle">PK</text>
+<text x="1246" y="733" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">result_id</text>
+<text x="1520" y="733" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="1197" y="744" width="35" height="24" rx="4" fill="#e5f3ed" stroke="none" stroke-width="1.5"/>
+<text x="1214.5" y="761" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#23674c" text-anchor="middle">FK</text>
+<text x="1246" y="764" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">student_id</text>
+<text x="1520" y="764" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<rect x="1197" y="775" width="35" height="24" rx="4" fill="#e5f3ed" stroke="none" stroke-width="1.5"/>
+<text x="1214.5" y="792" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" fill="#23674c" text-anchor="middle">FK</text>
+<text x="1246" y="795" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">exam_id</text>
+<text x="1520" y="795" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">INT</text>
+<text x="1246" y="826" font-family="Segoe UI, Arial, sans-serif" font-size="20" font-weight="400" fill="#17263c" text-anchor="start">marks</text>
+<text x="1520" y="826" font-family="Segoe UI, Arial, sans-serif" font-size="15" font-weight="400" fill="#52627b" text-anchor="end">DECIMAL</text>
+<polyline points="60,962 1540,962" fill="none" stroke="#d5deeb" stroke-width="1" stroke-linejoin="round"/>
+<text x="60" y="1000" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="400" fill="#52627b" text-anchor="start">PK  Primary key     FK  Foreign key     UK  Unique key</text>
+<text x="840" y="1000" font-family="Segoe UI, Arial, sans-serif" font-size="19" font-weight="400" fill="#52627b" text-anchor="start">Each relationship: one parent to zero or many children</text>
+</svg>

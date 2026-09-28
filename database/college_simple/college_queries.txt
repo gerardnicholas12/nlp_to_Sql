@@ -1,0 +1,269 @@
+-- COLLEGE DATABASE: CREATE, INSERT AND DISPLAY
+-- MySQL 8.0.16 or later. Run this file in MySQL Workbench or the mysql client.
+-- This script creates a NEW demonstration database named college_demo.
+-- It does not drop or change the existing college application database.
+-- Run the complete script once. To use another new database, change the
+-- database name in the CREATE DATABASE and USE statements below.
+-- To display the existing app database only, execute USE college; and then
+-- run sections 4 onward, without running the creation or insert sections.
+
+-- 1. CREATE AND SELECT THE DATABASE
+CREATE DATABASE college_demo CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE college_demo;
+
+-- 2. CREATE THE SIX TABLES AND THEIR RELATIONSHIP CONSTRAINTS
+-- Six academic tables, based on the supplied reference picture.
+-- classes are student groups; exams associate a group with a course.
+-- Each mark belongs to a student through results, rather than to the exam itself.
+CREATE TABLE faculty (
+    faculty_id INT PRIMARY KEY AUTO_INCREMENT,
+    faculty_name VARCHAR(100) NOT NULL,
+    designation VARCHAR(60) NOT NULL,
+    qualification VARCHAR(60) NOT NULL,
+    experience INT NOT NULL,
+    CONSTRAINT chk_faculty_experience CHECK (experience BETWEEN 0 AND 60)
+) ENGINE=InnoDB;
+
+CREATE TABLE classes (
+    class_id INT PRIMARY KEY AUTO_INCREMENT,
+    class_name VARCHAR(40) NOT NULL UNIQUE,
+    semester INT NOT NULL,
+    CONSTRAINT chk_class_semester CHECK (semester BETWEEN 1 AND 8)
+) ENGINE=InnoDB;
+
+CREATE TABLE courses (
+    course_id INT PRIMARY KEY AUTO_INCREMENT,
+    course_name VARCHAR(100) NOT NULL UNIQUE,
+    credits INT NOT NULL,
+    faculty_id INT NOT NULL,
+    CONSTRAINT chk_course_credits CHECK (credits BETWEEN 1 AND 6),
+    CONSTRAINT fk_course_faculty FOREIGN KEY (faculty_id) REFERENCES faculty(faculty_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    srn VARCHAR(20) NOT NULL UNIQUE,
+    student_name VARCHAR(100) NOT NULL,
+    address VARCHAR(200) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    class_id INT NOT NULL,
+    CONSTRAINT fk_student_class FOREIGN KEY (class_id) REFERENCES classes(class_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE exams (
+    exam_id INT PRIMARY KEY AUTO_INCREMENT,
+    exam_name VARCHAR(60) NOT NULL,
+    class_id INT NOT NULL,
+    course_id INT NOT NULL,
+    exam_date DATE NOT NULL,
+    CONSTRAINT uq_exam UNIQUE (class_id, course_id, exam_name),
+    CONSTRAINT fk_exam_class FOREIGN KEY (class_id) REFERENCES classes(class_id),
+    CONSTRAINT fk_exam_course FOREIGN KEY (course_id) REFERENCES courses(course_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE results (
+    result_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT NOT NULL,
+    exam_id INT NOT NULL,
+    marks DECIMAL(5,2) NOT NULL,
+    CONSTRAINT uq_student_exam UNIQUE (student_id, exam_id),
+    CONSTRAINT chk_result_marks CHECK (marks BETWEEN 0 AND 100),
+    CONSTRAINT fk_result_student FOREIGN KEY (student_id) REFERENCES students(student_id),
+    CONSTRAINT fk_result_exam FOREIGN KEY (exam_id) REFERENCES exams(exam_id)
+) ENGINE=InnoDB;
+
+-- Ordinary single-column foreign keys stay easy to explain. These small guards
+-- also reject a result for an exam belonging to a different student's class.
+DELIMITER $$
+CREATE TRIGGER result_class_insert BEFORE INSERT ON results FOR EACH ROW
+BEGIN
+    DECLARE student_class INT;
+    DECLARE exam_class INT;
+    SELECT class_id INTO student_class FROM students WHERE student_id=NEW.student_id FOR SHARE;
+    SELECT class_id INTO exam_class FROM exams WHERE exam_id=NEW.exam_id FOR SHARE;
+    IF student_class <> exam_class THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Student and exam must belong to the same class';
+    END IF;
+END$$
+CREATE TRIGGER result_class_update BEFORE UPDATE ON results FOR EACH ROW
+BEGIN
+    DECLARE student_class INT;
+    DECLARE exam_class INT;
+    SELECT class_id INTO student_class FROM students WHERE student_id=NEW.student_id FOR SHARE;
+    SELECT class_id INTO exam_class FROM exams WHERE exam_id=NEW.exam_id FOR SHARE;
+    IF student_class <> exam_class THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Student and exam must belong to the same class';
+    END IF;
+END$$
+CREATE TRIGGER student_class_update BEFORE UPDATE ON students FOR EACH ROW
+BEGIN
+    IF NEW.class_id <> OLD.class_id AND EXISTS (
+        SELECT 1 FROM results r JOIN exams e ON e.exam_id=r.exam_id
+        WHERE r.student_id=OLD.student_id AND e.class_id <> NEW.class_id
+    ) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Existing exam results prevent changing this student class';
+    END IF;
+END$$
+CREATE TRIGGER exam_class_update BEFORE UPDATE ON exams FOR EACH ROW
+BEGIN
+    IF NEW.class_id <> OLD.class_id AND EXISTS (
+        SELECT 1 FROM results r JOIN students s ON s.student_id=r.student_id
+        WHERE r.exam_id=OLD.exam_id AND s.class_id <> NEW.class_id
+    ) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Existing results prevent changing this exam class';
+    END IF;
+END$$
+DELIMITER ;
+
+-- 3. INSERT 15 RECORDS INTO EACH TABLE (90 RECORDS IN TOTAL)
+-- Synthetic demo records. Each of the six tables has exactly 15 rows.
+START TRANSACTION;
+INSERT INTO faculty (faculty_id,faculty_name,designation,qualification,experience) VALUES
+(1,'Anita Rao','Professor','PhD Computer Science',18),
+(2,'Vikram Nair','Associate Professor','PhD Mathematics',12),
+(3,'Meera Shah','Assistant Professor','MTech Computer Science',7),
+(4,'Arjun Das','Professor','PhD Electronics',20),
+(5,'Priya Menon','Assistant Professor','MTech Information Technology',6),
+(6,'Sanjay Kumar','Associate Professor','PhD Computer Science',11),
+(7,'Kavya Iyer','Assistant Professor','MSc Statistics',5),
+(8,'Rohit Patel','Professor','PhD Physics',16),
+(9,'Nisha Singh','Associate Professor','PhD English',10),
+(10,'Dev Verma','Assistant Professor','MTech Electronics',4),
+(11,'Latha Krishnan','Professor','PhD Mathematics',22),
+(12,'Amit Joshi','Assistant Professor','MTech Computer Science',3),
+(13,'Sara Thomas','Associate Professor','PhD Chemistry',13),
+(14,'Kiran Reddy','Assistant Professor','MBA',8),
+(15,'Maya Bose','Professor','PhD Economics',19);
+
+INSERT INTO classes (class_id,class_name,semester) VALUES
+(1,'CSE-3A',3),(2,'CSE-3B',3),(3,'ECE-3A',3),(4,'ECE-3B',3),(5,'ISE-3A',3),
+(6,'CSE-5A',5),(7,'CSE-5B',5),(8,'ECE-5A',5),(9,'ISE-5A',5),(10,'ISE-5B',5),
+(11,'CSE-1A',1),(12,'ECE-1A',1),(13,'ISE-1A',1),(14,'CSE-7A',7),(15,'ECE-7A',7);
+
+INSERT INTO courses (course_id,course_name,credits,faculty_id) VALUES
+(1,'Database Management Systems',4,1),(2,'Discrete Mathematics',4,2),
+(3,'Data Structures',4,3),(4,'Digital Electronics',3,4),
+(5,'Web Technology',3,5),(6,'Operating Systems',4,6),
+(7,'Probability and Statistics',3,7),(8,'Engineering Physics',4,8),
+(9,'Technical Communication',2,9),(10,'Microcontrollers',3,10),
+(11,'Computer Networks',4,1),(12,'Linear Algebra',3,2),
+(13,'Python Programming',3,3),(14,'Embedded Systems',4,4),
+(15,'Software Engineering',3,5);
+
+INSERT INTO students (student_id,srn,student_name,address,phone,email,class_id) VALUES
+(1,'PES2026001','Aarav Sharma','12 Lake Road, Bengaluru','0000000001','aarav@example.invalid',1),
+(2,'PES2026002','Diya Nair','24 Park Road, Mysuru','0000000002','diya@example.invalid',2),
+(3,'PES2026003','Kabir Patel','36 Hill Road, Bengaluru','0000000003','kabir@example.invalid',3),
+(4,'PES2026004','Meera Rao','48 Temple Road, Mangaluru','0000000004','meera@example.invalid',4),
+(5,'PES2026005','Ishaan Das','15 Garden Road, Hubballi','0000000005','ishaan@example.invalid',5),
+(6,'PES2026006','Ananya Singh','27 College Road, Bengaluru','0000000006','ananya@example.invalid',6),
+(7,'PES2026007','Rohan Kumar','39 Station Road, Mysuru','0000000007','rohan@example.invalid',7),
+(8,'PES2026008','Tara Menon','51 Market Road, Bengaluru','0000000008','tara@example.invalid',8),
+(9,'PES2026009','Aditya Shah','18 River Road, Shivamogga','0000000009','aditya@example.invalid',9),
+(10,'PES2026010','Sana Iyer','30 School Road, Bengaluru','0000000010','sana@example.invalid',10),
+(11,'PES2026011','Vihaan Reddy','42 Palace Road, Mysuru','0000000011','vihaan@example.invalid',1),
+(12,'PES2026012','Anika Joshi','54 Green Road, Hubballi','0000000012','anika@example.invalid',2),
+(13,'PES2026013','Dhruv Verma','21 Main Road, Mangaluru','0000000013','dhruv@example.invalid',3),
+(14,'PES2026014','Kiara Thomas','33 Palm Road, Bengaluru','0000000014','kiara@example.invalid',4),
+(15,'PES2026015','Neil Bose','45 Cross Road, Belagavi','0000000015','neil@example.invalid',5);
+
+INSERT INTO exams (exam_id,exam_name,class_id,course_id,exam_date) VALUES
+(1,'Internal 1',1,1,'2026-09-01'),(2,'Internal 1',2,2,'2026-09-01'),
+(3,'Internal 1',3,3,'2026-09-02'),(4,'Internal 1',4,4,'2026-09-02'),
+(5,'Internal 1',5,5,'2026-09-03'),(6,'Internal 1',6,6,'2026-09-03'),
+(7,'Internal 1',7,7,'2026-09-04'),(8,'Internal 1',8,8,'2026-09-04'),
+(9,'Internal 1',9,9,'2026-09-05'),(10,'Internal 1',10,10,'2026-09-05'),
+(11,'Internal 1',1,11,'2026-09-08'),(12,'Internal 1',2,12,'2026-09-08'),
+(13,'Internal 1',3,13,'2026-09-09'),(14,'Internal 1',4,14,'2026-09-09'),
+(15,'Internal 1',5,15,'2026-09-10');
+
+INSERT INTO results (result_id,student_id,exam_id,marks) VALUES
+(1,1,1,92),(2,2,2,85),(3,3,3,78),(4,4,4,64),(5,5,5,88),
+(6,6,6,95),(7,7,7,56),(8,8,8,73),(9,9,9,81),(10,10,10,39),
+(11,11,11,90),(12,12,12,67),(13,13,13,84),(14,14,14,76),(15,1,11,86);
+COMMIT;
+
+-- 4. DISPLAY ALL TABLE NAMES
+SHOW TABLES;
+
+-- 5. DISPLAY THE STRUCTURE OF EACH TABLE
+DESCRIBE faculty;
+DESCRIBE classes;
+DESCRIBE courses;
+DESCRIBE students;
+DESCRIBE exams;
+DESCRIBE results;
+
+-- 6. DISPLAY ALL 15 RECORDS FROM EACH TABLE
+
+-- FACULTY
+SELECT * FROM faculty ORDER BY faculty_id;
+
+-- CLASSES
+SELECT * FROM classes ORDER BY class_id;
+
+-- COURSES
+SELECT * FROM courses ORDER BY course_id;
+
+-- STUDENTS
+SELECT * FROM students ORDER BY student_id;
+
+-- EXAMS
+SELECT * FROM exams ORDER BY exam_id;
+
+-- RESULTS
+SELECT * FROM results ORDER BY result_id;
+
+-- 7. VERIFY THAT EACH TABLE HAS 15 RECORDS
+SELECT 'faculty' AS table_name, COUNT(*) AS record_count FROM faculty
+UNION ALL
+SELECT 'classes' AS table_name, COUNT(*) AS record_count FROM classes
+UNION ALL
+SELECT 'courses' AS table_name, COUNT(*) AS record_count FROM courses
+UNION ALL
+SELECT 'students' AS table_name, COUNT(*) AS record_count FROM students
+UNION ALL
+SELECT 'exams' AS table_name, COUNT(*) AS record_count FROM exams
+UNION ALL
+SELECT 'results' AS table_name, COUNT(*) AS record_count FROM results;
+
+-- 8. DISPLAY RELATED DATA USING SIMPLE JOINS
+
+-- Students and the classes they belong to.
+SELECT s.srn, s.student_name, cl.class_name, cl.semester
+FROM students s
+JOIN classes cl ON cl.class_id = s.class_id
+ORDER BY s.student_id;
+
+-- Courses and the faculty teaching them.
+SELECT c.course_name, c.credits, f.faculty_name
+FROM courses c
+JOIN faculty f ON f.faculty_id = c.faculty_id
+ORDER BY c.course_id;
+
+-- Exams, their courses, and the classes taking them.
+SELECT e.exam_id, e.exam_name, c.course_name,
+       cl.class_name, cl.semester, e.exam_date
+FROM exams e
+JOIN courses c ON c.course_id = e.course_id
+JOIN classes cl ON cl.class_id = e.class_id
+ORDER BY e.exam_id;
+
+-- Each student's marks for each recorded exam.
+SELECT s.srn, s.student_name, e.exam_name,
+       c.course_name, r.marks
+FROM results r
+JOIN students s ON s.student_id = r.student_id
+JOIN exams e ON e.exam_id = r.exam_id
+JOIN courses c ON c.course_id = e.course_id
+ORDER BY s.student_id, e.exam_id;
+
+-- 9. DISPLAY ALL SIX FOREIGN-KEY RELATIONSHIPS
+SELECT TABLE_NAME AS child_table, COLUMN_NAME AS foreign_key,
+       REFERENCED_TABLE_NAME AS parent_table,
+       REFERENCED_COLUMN_NAME AS parent_key
+FROM information_schema.KEY_COLUMN_USAGE
+WHERE TABLE_SCHEMA = DATABASE()
+  AND REFERENCED_TABLE_NAME IS NOT NULL
+ORDER BY TABLE_NAME, COLUMN_NAME;

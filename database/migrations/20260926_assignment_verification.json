@@ -1,0 +1,18 @@
+{
+  "applied_at_utc": "20260926T070922Z",
+  "database": "college",
+  "backup_path": "C:\\Users\\r1012\\nlp_to_Sql\\database\\backups\\20260926T070922Z_assign_course_department\\college.sql",
+  "backup_sha256": "2b4f8273f74feaf6550549f3090b4bb10b61aac5655507ccc5b5e7975d878f55",
+  "migration_sha256": "1d816fb6279d21079176006cb8c95b63372a2b1e2c0ddad2f459d0423523bff4",
+  "rows_assigned": {
+    "student_info": 15,
+    "employee_info": 10
+  },
+  "remaining_unassigned": {
+    "student_info": 0,
+    "employee_info": 0
+  },
+  "all_other_data_preserved": true,
+  "rerun_changes_zero_rows": true,
+  "all_assigned_ids_reference_existing_records": true
+}

@@ -1,0 +1,816 @@
+const API_BASE = "http://127.0.0.1:5000";
+
+const runBtn = document.getElementById("runBtn");
+const statusText = document.getElementById("statusText");
+const userInput = document.getElementById("userInput");
+
+const authScreen = document.getElementById("authScreen");
+const appSection = document.getElementById("appSection");
+const authUsername = document.getElementById("authUsername");
+const authPassword = document.getElementById("authPassword");
+const authStatusText = document.getElementById("authStatusText");
+const authSubmitBtn = document.getElementById("authSubmitBtn");
+const authSubmitLabel = document.getElementById("authSubmitLabel");
+const authModeLabel = document.getElementById("authModeLabel");
+const authToggleText = document.getElementById("authToggleText");
+const authToggleBtn = document.getElementById("authToggleBtn");
+const userBadge = document.getElementById("userBadge");
+const userBadgeText = document.getElementById("userBadgeText");
+const adminSection = document.getElementById("adminSection");
+
+// Chatbot/feedback DOM refs - declared up here with everything else
+// (not down near the bottom) because resetConsoleState() -> resetChat()
+// can run synchronously during page load (via showApp() when a token
+// already exists in localStorage). Declaring these as `const` further
+// down the file caused a ReferenceError/TDZ crash the last time this
+// happened - see the "Add Column" panel bug from before. Keep all
+// shared DOM consts together at the top from now on.
+const chatLog = document.getElementById("chatLog");
+const chatSatisfaction = document.getElementById("chatSatisfaction");
+const chatFeedbackInput = document.getElementById("chatFeedbackInput");
+const chatFeedbackText = document.getElementById("chatFeedbackText");
+const chatStatusText = document.getElementById("chatStatusText");
+
+let lastSQL = "";
+let authMode = "login"; // or "signup"
+
+// ---------------- CHATBOT / FEEDBACK STATE ----------------
+// originalQuestion + lastSQL together are all the "context" the refinement
+// endpoint needs. There's no server-side session for this - the frontend
+// just keeps sending the latest SQL back with each round of feedback.
+let originalQuestion = "";
+
+// ---------------- AUTH STATE ----------------
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function getRole() {
+  return localStorage.getItem("role");
+}
+
+function saveSession(token, username, role) {
+  localStorage.setItem("token", token);
+  localStorage.setItem("username", username);
+  localStorage.setItem("role", role);
+}
+
+function clearSession() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  localStorage.removeItem("role");
+}
+
+function resetConsoleState() {
+  userInput.value = "";
+  lastSQL = "";
+  originalQuestion = "";
+  window.resultData = null;
+  setStatus("", false);
+  document.getElementById("sqlSection").style.display = "none";
+  document.getElementById("outputSection").style.display = "none";
+  document.querySelector(".query").innerText = "";
+  document.querySelector("table").innerHTML = "";
+  document.getElementById("chatSection").style.display = "none";
+  resetChat();
+}
+
+function showApp() {
+  const username = localStorage.getItem("username");
+  const role = getRole();
+
+  resetConsoleState();
+
+  authScreen.style.display = "none";
+  appSection.style.display = "block";
+
+  userBadge.style.display = "flex";
+  userBadgeText.textContent = `${username} - ${role}`;
+
+  adminSection.style.display = role === "admin" ? "block" : "none";
+
+  if (role === "admin") {
+    loadAdminPanel();
+  }
+}
+
+function showAuthScreen() {
+  authScreen.style.display = "block";
+  appSection.style.display = "none";
+  userBadge.style.display = "none";
+}
+
+function logout() {
+  clearSession();
+  showAuthScreen();
+  setAuthStatus("Logged out.", false);
+}
+
+// On load: if we already have a token, skip straight to the app
+if (getToken()) {
+  showApp();
+} else {
+  showAuthScreen();
+}
+
+// ---------------- LOGIN / SIGNUP FORM ----------------
+
+function setAuthStatus(message, isError) {
+  authStatusText.textContent = message;
+  authStatusText.classList.toggle("is-error", Boolean(isError));
+}
+
+function toggleAuthMode() {
+  authMode = authMode === "login" ? "signup" : "login";
+
+  if (authMode === "signup") {
+    authModeLabel.textContent = "signup.session";
+    authSubmitLabel.textContent = "Sign up";
+    authToggleText.textContent = "Already have an account?";
+    authToggleBtn.textContent = "Log in";
+  } else {
+    authModeLabel.textContent = "login.session";
+    authSubmitLabel.textContent = "Log in";
+    authToggleText.textContent = "Don't have an account?";
+    authToggleBtn.textContent = "Sign up";
+  }
+
+  setAuthStatus("", false);
+}
+
+function submitAuth() {
+  const username = authUsername.value.trim();
+  const password = authPassword.value;
+
+  if (!username || !password) {
+    setAuthStatus("Enter a username and password.", true);
+    return;
+  }
+
+  const endpoint = authMode === "signup" ? "/signup" : "/login";
+
+  authSubmitBtn.disabled = true;
+  setAuthStatus(authMode === "signup" ? "Creating account..." : "Logging in...", false);
+
+  fetch(API_BASE + endpoint, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  })
+    .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+    .then(({ ok, data }) => {
+      authSubmitBtn.disabled = false;
+
+      if (!ok || data.error) {
+        setAuthStatus(data.error || "Something went wrong.", true);
+        return;
+      }
+
+      saveSession(data.token, data.username, data.role);
+      authPassword.value = "";
+      setAuthStatus("", false);
+      showApp();
+    })
+    .catch((error) => {
+      authSubmitBtn.disabled = false;
+      setAuthStatus("Couldn't reach the backend. Is the Flask server running?", true);
+      console.log(error);
+    });
+}
+
+// ---------------- VOICE INPUT ----------------
+
+const micBtn = document.getElementById("micBtn");
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+let recognition = null;
+let isListening = false;
+
+if (SpeechRecognitionAPI) {
+  recognition = new SpeechRecognitionAPI();
+  recognition.lang = "en-US";
+  recognition.continuous = false;    // auto-stop after a pause in speech
+  recognition.interimResults = true; // show text live while still talking
+
+  recognition.onstart = () => {
+    isListening = true;
+    micBtn.classList.add("listening");
+    setStatus("Listening...", false);
+  };
+
+  recognition.onresult = (event) => {
+    let transcript = "";
+    for (let i = 0; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    userInput.value = transcript;
+  };
+
+  recognition.onerror = (event) => {
+    setStatus(`Mic error: ${event.error}`, true);
+  };
+
+  recognition.onend = () => {
+    isListening = false;
+    micBtn.classList.remove("listening");
+    if (statusText.textContent === "Listening...") {
+      setStatus("", false);
+    }
+    userInput.focus();
+  };
+} else {
+  micBtn.disabled = true;
+  micBtn.title = "Voice input isn't supported in this browser. Try Chrome or Edge.";
+}
+
+function toggleMic() {
+  if (!recognition) return;
+
+  if (isListening) {
+    recognition.stop();
+  } else {
+    userInput.value = "";
+    recognition.start();
+  }
+}
+
+// Press Enter to run the query, Shift+Enter for a new line
+userInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    showSQL();
+  }
+});
+
+// ---------------- CHIPS (existing behaviour) ----------------
+
+document.getElementById("chips").addEventListener("click", (e) => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  userInput.value = chip.dataset.q;
+  userInput.focus();
+});
+
+// ---------------- QUERY CONSOLE ----------------
+
+function setStatus(message, isError) {
+  statusText.textContent = message;
+  statusText.classList.toggle("is-error", Boolean(isError));
+}
+
+function showSQL() {
+  const question = userInput.value.trim();
+
+  if (!question) {
+    setStatus("Type a question first.", true);
+    return;
+  }
+
+  const token = getToken();
+  if (!token) {
+    showAuthScreen();
+    setAuthStatus("Please log in first.", true);
+    return;
+  }
+
+  runBtn.disabled = true;
+  setStatus("Running query...", false);
+  document.getElementById("outputSection").style.display = "none";
+  document.getElementById("sqlSection").style.display = "none";
+  document.getElementById("chatSection").style.display = "none";
+  lastSQL = "";
+  window.resultData = [];
+
+  fetch(API_BASE + "/query", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
+    body: JSON.stringify({ question: question })
+  })
+    .then((response) => response.json().then((data) => ({ status: response.status, data })))
+    .then(({ status, data }) => {
+      runBtn.disabled = false;
+
+      if (status === 401) {
+        // Token missing/expired - send them back to login
+        clearSession();
+        showAuthScreen();
+        setAuthStatus("Your session expired. Please log in again.", true);
+        return;
+      }
+
+      if (data.error) {
+        setStatus(data.error, true);
+        return;
+      }
+
+      setStatus("Done.", false);
+
+      lastSQL = data.sql || "";
+      originalQuestion = question;
+      document.getElementById("sqlSection").style.display = "block";
+      document.querySelector(".query").innerText = lastSQL;
+      const interpretation = document.getElementById("queryInterpretation");
+      interpretation.textContent = (data.interpretation || []).join(" ");
+      interpretation.hidden = !interpretation.textContent;
+
+      window.resultData = data.data;
+
+      resetChat();
+      document.getElementById("chatSection").style.display = "block";
+    })
+    .catch((error) => {
+      runBtn.disabled = false;
+      setStatus("Couldn't reach the backend. Is the Flask server running?", true);
+      console.log(error);
+    });
+}
+
+function copySQL() {
+  if (!lastSQL) return;
+
+  navigator.clipboard.writeText(lastSQL).then(() => {
+    const copyBtn = document.getElementById("copyBtn");
+    const original = copyBtn.textContent;
+    copyBtn.textContent = "Copied";
+    setTimeout(() => {
+      copyBtn.textContent = original;
+    }, 1200);
+  });
+}
+
+// ---------------- ADMIN PANEL ----------------
+
+let schemaCache = null;
+
+function authHeaders() {
+  return {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer " + getToken()
+  };
+}
+
+// app_users is off-limits in the generic admin panel - handled via
+// /signup and manual DB inserts instead, never through this form.
+const ADMIN_HIDDEN_TABLES = ["app_users"];
+const ADMIN_PRIMARY_KEYS = {
+  students: "student_id",
+  faculty: "faculty_id",
+  courses: "course_id",
+  classes: "class_id",
+  exams: "exam_id",
+  results: "result_id"
+};
+
+function loadAdminPanel() {
+  if (getRole() !== "admin") return;
+
+  fetch(API_BASE + "/schema")
+    .then((r) => r.json())
+    .then((schema) => {
+      schemaCache = schema;
+
+      const select = document.getElementById("adminTableSelect");
+      const previouslySelected = select.value;
+
+      select.innerHTML = "";
+      Object.keys(schema)
+        .filter((table) => !ADMIN_HIDDEN_TABLES.includes(table))
+        .forEach((table) => {
+          const opt = document.createElement("option");
+          opt.value = table;
+          opt.textContent = table;
+          select.appendChild(opt);
+        });
+
+      // keep the same table selected across a refresh (e.g. after adding
+      // a column) instead of always resetting to the first option
+      if (previouslySelected && schema[previouslySelected]) {
+        select.value = previouslySelected;
+      }
+
+      renderAdminFields();
+    })
+    .catch((error) => console.log("Couldn't load schema:", error));
+}
+
+document.getElementById("adminTableSelect")?.addEventListener("change", renderAdminFields);
+
+function renderAdminFields() {
+  if (!schemaCache) return;
+
+  const table = document.getElementById("adminTableSelect").value;
+  const columns = schemaCache[table] || {};
+
+  const buildFields = (containerId, idPrefix) => {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    Object.keys(columns).forEach((col) => {
+      if (col === ADMIN_PRIMARY_KEYS[table]) return; // auto-increment primary key
+
+      const row = document.createElement("div");
+      row.className = "field-row";
+
+      const label = document.createElement("label");
+      label.className = "field-label";
+      label.textContent = `${col} (${columns[col]})`;
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "field-input";
+      input.id = `${idPrefix}_${col}`;
+      input.dataset.column = col;
+
+      row.appendChild(label);
+      row.appendChild(input);
+      container.appendChild(row);
+    });
+  };
+
+  buildFields("insertFields", "insert");
+  buildFields("updateFields", "update");
+}
+
+document.getElementById("adminTabs")?.addEventListener("click", (e) => {
+  const tabBtn = e.target.closest(".admin-tab");
+  if (!tabBtn) return;
+
+  document.querySelectorAll(".admin-tab").forEach((b) => b.classList.remove("active"));
+  tabBtn.classList.add("active");
+
+  const tab = tabBtn.dataset.tab;
+  document.getElementById("adminPanelInsert").style.display = tab === "insert" ? "block" : "none";
+  document.getElementById("adminPanelUpdate").style.display = tab === "update" ? "block" : "none";
+  document.getElementById("adminPanelDelete").style.display = tab === "delete" ? "block" : "none";
+  document.getElementById("adminPanelColumn").style.display = tab === "column" ? "block" : "none";
+});
+
+function collectFields(containerId) {
+  const data = {};
+  document.querySelectorAll(`#${containerId} [data-column]`).forEach((input) => {
+    if (input.value !== "") {
+      data[input.dataset.column] = input.value;
+    }
+  });
+  return data;
+}
+
+function setAdminStatus(elId, message, isError) {
+  const el = document.getElementById(elId);
+  el.textContent = message;
+  el.classList.toggle("is-error", Boolean(isError));
+}
+
+function submitInsert() {
+  const table = document.getElementById("adminTableSelect").value;
+  const data = collectFields("insertFields");
+
+  setAdminStatus("insertStatus", "Inserting...", false);
+
+  fetch(API_BASE + "/admin/insert", {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ table, data })
+  })
+    .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+    .then(({ ok, body }) => {
+      if (!ok || body.error) {
+        setAdminStatus("insertStatus", body.error || "Insert failed.", true);
+        return;
+      }
+      setAdminStatus("insertStatus", `Inserted row with id ${body.id}.`, false);
+    })
+    .catch((error) => {
+      setAdminStatus("insertStatus", "Couldn't reach the backend.", true);
+      console.log(error);
+    });
+}
+
+// ---------------- UPDATE TAB: AUTO-FILL FROM ROW ID ----------------
+// As soon as a Row ID is entered (on blur, or pressing Enter in the
+// field), fetch that row from the new GET /admin/row endpoint and fill
+// every field in the Update form with its current value. The user then
+// only has to touch the field(s) they actually want to change - anything
+// left alone still gets sent back with its original value in
+// collectFields(), so "leave it alone" and "explicitly set it back to
+// what it already was" both work out to the same harmless UPDATE.
+//
+// A column that's genuinely NULL in the DB is filled in as an empty
+// string, which matches collectFields()'s existing "blank = don't
+// include this column in the UPDATE" behaviour - so a NULL column stays
+// untouched (still NULL) unless the user types something into it.
+
+function fetchRowForUpdate() {
+  const tableSelect = document.getElementById("adminTableSelect");
+  const idInput = document.getElementById("updateId");
+  if (!tableSelect || !idInput) return;
+
+  const table = tableSelect.value;
+  const id = idInput.value.trim();
+
+  if (!id) return;
+
+  setAdminStatus("updateStatus", "Loading row...", false);
+
+  const url = `${API_BASE}/admin/row?table=${encodeURIComponent(table)}&id=${encodeURIComponent(id)}`;
+
+  fetch(url, {
+    method: "GET",
+    headers: authHeaders()
+  })
+    .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+    .then(({ ok, body }) => {
+      if (!ok || body.error) {
+        setAdminStatus("updateStatus", body.error || "Couldn't find that row.", true);
+        return;
+      }
+
+      const row = body.row || {};
+
+      document.querySelectorAll("#updateFields [data-column]").forEach((input) => {
+        const col = input.dataset.column;
+        const val = row[col];
+        input.value = (val === null || val === undefined) ? "" : val;
+      });
+
+      setAdminStatus("updateStatus", "Row loaded - edit only what you want to change.", false);
+    })
+    .catch((error) => {
+      setAdminStatus("updateStatus", "Couldn't reach the backend.", true);
+      console.log(error);
+    });
+}
+
+document.getElementById("updateId")?.addEventListener("blur", fetchRowForUpdate);
+
+document.getElementById("updateId")?.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    fetchRowForUpdate();
+  }
+});
+
+function submitUpdate() {
+  const table = document.getElementById("adminTableSelect").value;
+  const id = document.getElementById("updateId").value;
+  const data = collectFields("updateFields");
+
+  if (!id) {
+    setAdminStatus("updateStatus", "Enter a row ID.", true);
+    return;
+  }
+
+  setAdminStatus("updateStatus", "Updating...", false);
+
+  fetch(API_BASE + "/admin/update", {
+    method: "PUT",
+    headers: authHeaders(),
+    body: JSON.stringify({ table, id, data })
+  })
+    .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+    .then(({ ok, body }) => {
+      if (!ok || body.error) {
+        setAdminStatus("updateStatus", body.error || "Update failed.", true);
+        return;
+      }
+      setAdminStatus("updateStatus", `Updated ${body.rows_affected} row(s).`, false);
+    })
+    .catch((error) => {
+      setAdminStatus("updateStatus", "Couldn't reach the backend.", true);
+      console.log(error);
+    });
+}
+
+function submitDelete() {
+  const table = document.getElementById("adminTableSelect").value;
+  const id = document.getElementById("deleteId").value;
+
+  if (!id) {
+    setAdminStatus("deleteStatus", "Enter a row ID.", true);
+    return;
+  }
+
+  if (!confirm(`Delete row ${id} from ${table}? This can't be undone.`)) {
+    return;
+  }
+
+  setAdminStatus("deleteStatus", "Deleting...", false);
+
+  fetch(API_BASE + "/admin/delete", {
+    method: "DELETE",
+    headers: authHeaders(),
+    body: JSON.stringify({ table, id })
+  })
+    .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+    .then(({ ok, body }) => {
+      if (!ok || body.error) {
+        setAdminStatus("deleteStatus", body.error || "Delete failed.", true);
+        return;
+      }
+      setAdminStatus("deleteStatus", `Deleted ${body.rows_affected} row(s).`, false);
+    })
+    .catch((error) => {
+      setAdminStatus("deleteStatus", "Couldn't reach the backend.", true);
+      console.log(error);
+    });
+}
+
+// ---------------- ADD COLUMN ----------------
+
+function submitAddColumn() {
+  const table = document.getElementById("adminTableSelect").value;
+  const column_name = document.getElementById("newColumnName").value.trim();
+  const column_type = document.getElementById("newColumnType").value.trim();
+  const nullable = document.getElementById("newColumnNullable").checked;
+  const defaultVal = document.getElementById("newColumnDefault").value.trim();
+
+  if (!column_name || !column_type) {
+    setAdminStatus("columnStatus", "Enter a column name and type.", true);
+    return;
+  }
+
+  setAdminStatus("columnStatus", "Adding column...", false);
+
+  fetch(API_BASE + "/admin/column/add", {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({
+      table,
+      column_name,
+      column_type,
+      nullable,
+      default: defaultVal || null
+    })
+  })
+    .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+    .then(({ ok, body }) => {
+      if (!ok || body.error) {
+        setAdminStatus("columnStatus", body.error || "Add column failed.", true);
+        return;
+      }
+
+      setAdminStatus("columnStatus", `Column '${column_name}' added to '${table}'.`, false);
+
+      // clear the form
+      document.getElementById("newColumnName").value = "";
+      document.getElementById("newColumnType").value = "";
+      document.getElementById("newColumnDefault").value = "";
+      document.getElementById("newColumnNullable").checked = true;
+
+      // refresh schema cache + Insert/Update fields so the new column
+      // shows up immediately without a page reload
+      loadAdminPanel();
+    })
+    .catch((error) => {
+      setAdminStatus("columnStatus", "Couldn't reach the backend.", true);
+      console.log(error);
+    });
+}
+
+function showOutput() {
+  const data = window.resultData;
+
+  if (!data || data.length === 0) {
+    setStatus("No rows found for that query.", false);
+    return;
+  }
+
+  let table = "<tr>";
+
+  for (let key in data[0]) {
+    table += `<th>${key}</th>`;
+  }
+  table += "</tr>";
+
+  data.forEach((row) => {
+    table += "<tr>";
+    for (let key in row) {
+      table += `<td>${row[key]}</td>`;
+    }
+    table += "</tr>";
+  });
+
+  document.getElementById("outputSection").style.display = "block";
+  document.getElementById("rowCount").textContent =
+    data.length + (data.length === 1 ? " row" : " rows");
+  document.querySelector("table").innerHTML = table;
+}
+
+// ---------------- QUERY FEEDBACK CHATBOT ----------------
+// Flow: Yes/No satisfaction prompt -> (if No) free-text feedback ->
+// POST /query/refine -> updated SQL/output rendered -> prompt again.
+// This never re-runs the original NLP-to-SQL parser; it sends the
+// PREVIOUS SQL + the new feedback to a separate refinement endpoint.
+
+function resetChat() {
+  if (!chatLog) return;
+  chatLog.innerHTML = "";
+  chatFeedbackText.value = "";
+  setChatStatus("", false);
+  chatSatisfaction.style.display = "block";
+  chatFeedbackInput.style.display = "none";
+}
+
+function setChatStatus(message, isError) {
+  chatStatusText.textContent = message;
+  chatStatusText.classList.toggle("is-error", Boolean(isError));
+}
+
+function appendChatMessage(text, role) {
+  // role: "bot" or "user" or "error"
+  const bubble = document.createElement("div");
+  bubble.className = `chat-msg chat-msg-${role}`;
+  bubble.textContent = text;
+  chatLog.appendChild(bubble);
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
+function handleSatisfaction(satisfied) {
+  if (satisfied) {
+    appendChatMessage("Glad that worked! Let me know if you need anything else.", "bot");
+    chatSatisfaction.style.display = "none";
+    chatFeedbackInput.style.display = "none";
+    return;
+  }
+
+  appendChatMessage("What would you like to change, or what's incorrect?", "bot");
+  chatSatisfaction.style.display = "none";
+  chatFeedbackInput.style.display = "block";
+  chatFeedbackText.focus();
+}
+
+function submitChatFeedback() {
+  const feedback = chatFeedbackText.value.trim();
+
+  if (!feedback) {
+    setChatStatus("Type what you'd like to change first.", true);
+    return;
+  }
+
+  if (!lastSQL) {
+    setChatStatus("There's no previous query to refine yet.", true);
+    return;
+  }
+
+  const token = getToken();
+  if (!token) {
+    showAuthScreen();
+    setAuthStatus("Please log in first.", true);
+    return;
+  }
+
+  appendChatMessage(feedback, "user");
+  chatFeedbackText.value = "";
+  setChatStatus("Refining query...", false);
+
+  fetch(API_BASE + "/query/refine", {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({
+      previous_sql: lastSQL,
+      feedback: feedback
+    })
+  })
+    .then((response) => response.json().then((data) => ({ status: response.status, data })))
+    .then(({ status, data }) => {
+      if (status === 401) {
+        clearSession();
+        showAuthScreen();
+        setAuthStatus("Your session expired. Please log in again.", true);
+        return;
+      }
+
+      if (data.error) {
+        setChatStatus("", false);
+        appendChatMessage(data.error, "error");
+        // keep the feedback box open so the user can try rephrasing
+        return;
+      }
+
+      // Success: update the SQL panel + output table with the refined query
+      lastSQL = data.sql || lastSQL;
+      document.querySelector(".query").innerText = lastSQL;
+      document.getElementById("queryInterpretation").hidden = true;
+      window.resultData = data.data;
+      showOutput();
+
+      setChatStatus("", false);
+      const changeSummary = (data.applied_changes && data.applied_changes.length)
+        ? `Updated: ${data.applied_changes.join(", ")}.`
+        : "Updated the query.";
+      appendChatMessage(changeSummary, "bot");
+
+      // ask again
+      appendChatMessage("Does this query and output satisfy you?", "bot");
+      chatFeedbackInput.style.display = "none";
+      chatSatisfaction.style.display = "block";
+    })
+    .catch((error) => {
+      setChatStatus("Couldn't reach the backend. Is the Flask server running?", true);
+      console.log(error);
+    });
+}

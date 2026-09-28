@@ -1,0 +1,23 @@
+{
+  "checked_at_utc": "2026-09-17T14:18:22.333318+00:00",
+  "database": "college",
+  "passed_checks": [
+    "login reads separate authentication database",
+    "wrong password is rejected",
+    "signup uses separate authentication database",
+    "schema endpoint exposes only six academic tables",
+    "unauthenticated query is rejected",
+    "API: show students",
+    "API: show courses and faculty",
+    "API: show students with marks above 90",
+    "API: count students by class",
+    "refinement sorts marks from results",
+    "user cannot use admin routes",
+    "admin fetch uses entity-specific primary keys",
+    "admin cannot save invalid marks",
+    "admin cannot save a result for another class",
+    "valid admin update succeeds",
+    "admin probe restored original value",
+    "app verification preserved all six tables"
+  ]
+}

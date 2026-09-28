@@ -1,0 +1,23 @@
+{
+  "applied_at_utc": "20260926T065654Z",
+  "database": "college",
+  "backup_path": "C:\\Users\\r1012\\nlp_to_Sql\\database\\backups\\20260926T065654Z_course_department_links\\college.sql",
+  "backup_sha256": "d2b5aef8d77499c396aa4690109f89ce60a32339093ff0a2e027974067bc89b5",
+  "backup_restored_and_verified": true,
+  "migration_staged_and_verified": true,
+  "all_original_data_preserved": true,
+  "row_counts": {
+    "course": 5,
+    "department": 4,
+    "employee_info": 10,
+    "marks": 15,
+    "performance": 10,
+    "project": 8,
+    "student_info": 15,
+    "subject": 15
+  },
+  "foreign_keys_reject_unknown_ids": true,
+  "name_joins_verified_with_rolled_back_assignments": true,
+  "student_course_assignments": "unassigned",
+  "employee_department_assignments": "unassigned"
+}

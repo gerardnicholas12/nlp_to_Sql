@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NLP to SQL Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="page">
+
+  <header class="site-header">
+    <div class="wordmark">
+      <span class="wordmark-icon">&gt;_</span>
+      <span>nlq<span class="wordmark-arrow">&rarr;</span>sql</span>
+    </div>
+    <div class="header-right">
+      <span class="header-tag">Local dev tool</span>
+      <div class="user-badge" id="userBadge" style="display:none;">
+        <span id="userBadgeText"></span>
+        <button type="button" class="btn btn-ghost btn-small" onclick="logout()">Log out</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ---------------- AUTH SCREEN ---------------- -->
+  <main class="main" id="authScreen">
+
+    <section class="hero">
+      <p class="eyebrow">Welcome back</p>
+      <h1>Log in to run queries.</h1>
+      <p class="hero-sub">Admins can also manage data directly. New here? Sign up below - new accounts get read-only access.</p>
+    </section>
+
+    <section class="console auth-console" aria-label="Login">
+
+      <div class="console-bar">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-amber"></span>
+        <span class="dot dot-green"></span>
+        <span class="console-bar-label" id="authModeLabel">login.session</span>
+      </div>
+
+      <div class="console-body">
+
+        <div class="field-row">
+          <label class="field-label" for="authUsername">Username</label>
+          <input type="text" id="authUsername" class="field-input" autocomplete="username">
+        </div>
+
+        <div class="field-row">
+          <label class="field-label" for="authPassword">Password</label>
+          <input type="password" id="authPassword" class="field-input" autocomplete="current-password">
+        </div>
+
+        <div class="console-actions">
+          <button id="authSubmitBtn" class="btn btn-primary" onclick="submitAuth()">
+            <span class="btn-label" id="authSubmitLabel">Log in</span>
+          </button>
+          <span id="authStatusText" class="status-text"></span>
+        </div>
+
+        <p class="auth-toggle">
+          <span id="authToggleText">Don't have an account?</span>
+          <button type="button" class="link-btn" id="authToggleBtn" onclick="toggleAuthMode()">Sign up</button>
+        </p>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ---------------- MAIN APP (hidden until logged in) ---------------- -->
+  <main class="main" id="appSection" style="display:none;">
+
+    <section class="hero">
+      <p class="eyebrow">English in, SQL out</p>
+      <h1>Ask your database a question.</h1>
+      <p class="hero-sub">Type a question the way you'd ask a colleague. The converter maps it to intent, columns, and conditions, then builds the query for you.</p>
+    </section>
+
+    <section class="console" aria-label="Query console">
+
+      <div class="console-bar">
+        <span class="dot dot-red"></span>
+        <span class="dot dot-amber"></span>
+        <span class="dot dot-green"></span>
+        <span class="console-bar-label">query.session</span>
+      </div>
+
+      <div class="console-body">
+        <div class="prompt-row">
+          <span class="prompt-caret">&gt;</span>
+          <textarea id="userInput" placeholder="e.g. show students with marks above 80" rows="2"></textarea>
+          <button type="button" class="mic-btn" id="micBtn" onclick="toggleMic()" title="Speak your question">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </button>
+        </div>
+
+        <div class="console-actions">
+          <button id="runBtn" class="btn btn-primary" onclick="showSQL()">
+            <span class="btn-label">Run query</span>
+          </button>
+          <span id="statusText" class="status-text"></span>
+        </div>
+
+        <div class="chips" id="chips">
+          <button type="button" class="chip" data-q="count students by class">count students by class</button>
+          <button type="button" class="chip" data-q="show students with marks between 60 and 80">marks between 60 and 80</button>
+          <button type="button" class="chip" data-q="show courses and faculty">courses and faculty</button>
+          <button type="button" class="chip" data-q="show top 5 results with highest marks">top 5 exam results</button>
+        </div>
+      </div>
+
+    </section>
+
+    <section class="sql-box" id="sqlSection">
+      <div class="panel-head">
+        <h3>Generated SQL</h3>
+        <button type="button" class="btn btn-ghost btn-small" id="copyBtn" onclick="copySQL()">Copy</button>
+      </div>
+      <pre class="query"></pre>
+      <p id="queryInterpretation" class="query-interpretation" hidden></p>
+
+      <button class="btn btn-secondary" onclick="showOutput()">Show output</button>
+    </section>
+
+    <section class="output-box" id="outputSection">
+      <div class="panel-head">
+        <h3>Query result</h3>
+        <span class="row-count" id="rowCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table></table>
+      </div>
+    </section>
+
+    <!-- Query feedback chatbot: appears after a query has been run, asks
+         whether the result is satisfactory, and lets the user refine it
+         with follow-up feedback instead of re-typing the whole question. -->
+    <section class="chat-box" id="chatSection" style="display:none;">
+      <div class="panel-head">
+        <h3>Refine this result</h3>
+      </div>
+
+      <div class="chat-log" id="chatLog"></div>
+
+      <div class="chat-satisfaction" id="chatSatisfaction">
+        <p class="chat-prompt">Does this query and output satisfy you?</p>
+        <div class="chat-satisfaction-buttons">
+          <button type="button" class="btn btn-primary btn-small" onclick="handleSatisfaction(true)">Yes</button>
+          <button type="button" class="btn btn-ghost btn-small" onclick="handleSatisfaction(false)">No</button>
+        </div>
+      </div>
+
+      <div class="chat-feedback-input" id="chatFeedbackInput" style="display:none;">
+        <textarea id="chatFeedbackText" rows="2" placeholder="e.g. only show marks / sort by marks descending / limit to 5"></textarea>
+        <div class="console-actions">
+          <button type="button" class="btn btn-primary btn-small" onclick="submitChatFeedback()">Send</button>
+          <span id="chatStatusText" class="status-text"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Admin panel -->
+    <section class="admin-box" id="adminSection" style="display:none;">
+      <div class="panel-head">
+        <h3>Admin</h3>
+      </div>
+
+      <div class="admin-tabs" id="adminTabs">
+        <button type="button" class="admin-tab active" data-tab="insert">Insert</button>
+        <button type="button" class="admin-tab" data-tab="update">Update</button>
+        <button type="button" class="admin-tab" data-tab="delete">Delete</button>
+        <button type="button" class="admin-tab" data-tab="column">Add Column</button>
+      </div>
+
+      <div class="field-row">
+        <label class="field-label" for="adminTableSelect">Table</label>
+        <select id="adminTableSelect" class="field-input"></select>
+      </div>
+
+      <!-- INSERT panel -->
+      <div class="admin-panel" id="adminPanelInsert">
+        <div id="insertFields"></div>
+        <div class="console-actions">
+          <button class="btn btn-primary" onclick="submitInsert()">
+            <span class="btn-label">Insert row</span>
+          </button>
+          <span id="insertStatus" class="status-text"></span>
+        </div>
+      </div>
+
+      <!-- UPDATE panel -->
+      <div class="admin-panel" id="adminPanelUpdate" style="display:none;">
+        <div class="field-row">
+          <label class="field-label" for="updateId">Row ID</label>
+          <input type="number" id="updateId" class="field-input">
+        </div>
+        <div id="updateFields"></div>
+        <div class="console-actions">
+          <button class="btn btn-primary" onclick="submitUpdate()">
+            <span class="btn-label">Update row</span>
+          </button>
+          <span id="updateStatus" class="status-text"></span>
+        </div>
+      </div>
+
+      <!-- DELETE panel -->
+      <div class="admin-panel" id="adminPanelDelete" style="display:none;">
+        <div class="field-row">
+          <label class="field-label" for="deleteId">Row ID</label>
+          <input type="number" id="deleteId" class="field-input">
+        </div>
+        <div class="console-actions">
+          <button class="btn btn-secondary" onclick="submitDelete()">
+            <span class="btn-label">Delete row</span>
+          </button>
+          <span id="deleteStatus" class="status-text"></span>
+        </div>
+      </div>
+
+      <!-- ADD COLUMN panel -->
+      <div class="admin-panel" id="adminPanelColumn" style="display:none;">
+        <div class="field-row">
+          <label class="field-label" for="newColumnName">Column name</label>
+          <input type="text" id="newColumnName" class="field-input" placeholder="e.g. bonus">
+        </div>
+
+        <div class="field-row">
+          <label class="field-label" for="newColumnType">Column type</label>
+          <input type="text" id="newColumnType" class="field-input" placeholder="e.g. VARCHAR(255), INT, DATE">
+        </div>
+
+        <div class="field-row">
+          <label class="field-label" for="newColumnDefault">Default value (optional)</label>
+          <input type="text" id="newColumnDefault" class="field-input">
+        </div>
+
+        <div class="field-row field-row-checkbox">
+          <label class="field-label checkbox-label">
+            <input type="checkbox" id="newColumnNullable" checked>
+            Allow NULL
+          </label>
+        </div>
+
+        <div class="console-actions">
+          <button class="btn btn-primary" onclick="submitAddColumn()">
+            <span class="btn-label">Add column</span>
+          </button>
+          <span id="columnStatus" class="status-text"></span>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <span>Rule-based NLP &rarr; SQL converter &middot; runs against a local MySQL instance</span>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
